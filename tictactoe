@@ -1,0 +1,186 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define COMPUTER 1
+#define HUMAN 2
+#define SIDE 3 //3x3 size
+#define COMPUTERMOVE 'O'
+#define HUMANMOVE 'X'
+
+struct coordinates
+{
+    int x,y;
+};
+typedef struct coordinates cord;
+
+cord ret_cord(int m_ind)
+{
+    cord c;
+    switch (m_ind)
+    {
+        case 1:
+            c.x = 0;c.y = 0;break;
+        case 2:
+            c.x = 0;c.y = 1;break;
+        case 3:
+            c.x = 0;c.y = 2;break;
+        case 4:
+            c.x = 1;c.y = 0;break;
+        case 5:
+            c.x = 1;c.y = 1;break;
+        case 6:
+            c.x = 1;c.y = 2;break;
+        case 7:
+            c.x = 2;c.y = 0;break;
+        case 8:
+            c.x = 2;c.y = 1;break;
+        case 9:
+            c.x = 2;c.y = 2;break;
+    }
+    return c;
+}
+
+void viewBoard(char board[][SIDE])
+{
+    cout<<"\n\n";
+    cout<<"\t\t\t  | "<<board[0][0]<<" | "<<board[0][1]<<" | "<<board[0][2]<<" | "<<endl;
+    cout<<"\t\t\t-----------------"<<endl;
+    cout<<"\t\t\t  | "<<board[1][0]<<" | "<<board[1][1]<<" | "<<board[1][2]<<" | "<<endl;
+    cout<<"\t\t\t-----------------"<<endl;
+    cout<<"\t\t\t  | "<<board[2][0]<<" | "<<board[2][1]<<" | "<<board[2][2]<<" | "<<endl;
+    cout<<"\t\t\t-----------------"<<endl;
+}
+void instruct()
+{
+    cout<<"\t\t\t Welcome to Tic tac toe!"<<endl;
+    cout<<"\t\t\t Here are some instructions:\n 1. You will move X \n 2. Computer will move O \n"<<endl;
+}
+
+
+
+void initialize(char board[3][3], int moves[])
+{
+    srand(time(NULL));
+    for(int i=0;i<SIDE;i++)
+        for(int j=0;j<SIDE;j++)
+            board[i][j]=' ';
+    /*for (int i = 0; i < SIDE*SIDE; i++) {
+        moves[i] = i;
+    }*/
+    //random_shuffle(moves,moves+SIDE*SIDE);
+}
+
+void declare(int whoseturn)
+{
+    if(whoseturn==COMPUTER)
+        cout<<"Computer has won"<<endl;
+    else
+        cout<<"You are the winner"<<endl;
+}
+bool rowcrossed(char board[][SIDE])
+{
+    for(int i=0;i<SIDE;i++)
+    {
+        if(board[i][0]==board[i][1]&&board[i][1]==board[i][2]&&board[i][0]!=' ')
+            return(true);
+    }
+    return(false);
+}
+bool columncrossed(char board[][SIDE])
+{
+    for(int i=0;i<SIDE;i++)
+    {
+        if(board[0][i]==board[1][i]&&board[1][i]==board[2][i]&&board[0][i]!=' ')
+            return(true);
+    }
+    return(false);
+}
+bool diagonalcrossed(char board[][SIDE])
+{
+    if(board[0][0]==board[1][1]&&board[1][1]==board[2][2]&&board[0][0]!=' ')
+        return(true);
+    if(board[0][2]==board[1][1]&&board[1][1]==board[2][0]&&board[0][2]!=' ')
+        return(true);
+    return(false);
+}
+bool gameover(char board[][SIDE])
+{
+    return(rowcrossed(board)|| columncrossed(board)|| diagonalcrossed(board));
+}
+
+bool isFilled(cord f[],int x,int y)
+{
+    int i; bool flag = false;
+    for (i = 0; i < 9; i++)
+    {
+        if (f[i].x == x && f[i].y == y)
+            flag = true;
+    }
+    return flag;
+}
+void play(int whoseturn)
+{
+    char board[SIDE][SIDE];
+    int moves[(SIDE*SIDE)];
+    cord filled[9];
+    filled[0].x = NULL;
+    filled[0].y = NULL;
+    initialize(board,moves);
+    instruct();
+    int moveindex= 0,x,y,i=0;
+    while(!gameover(board) && moveindex != SIDE * SIDE)
+    {
+        if(whoseturn==COMPUTER)
+        {
+            moveindex = 1 + (rand() % 9);
+            x = ret_cord(moveindex).x;
+            y = ret_cord(moveindex).y;
+            while(isFilled(filled,x,y))
+            {
+                moveindex = 1 + (rand() % 9);
+                x = ret_cord(moveindex).x;
+                y = ret_cord(moveindex).y;
+            }
+            filled[i].x = x;
+            filled[i].y = y;
+            board[x][y] = COMPUTERMOVE;
+            cout << "Computer has put a " << COMPUTERMOVE << " in cell " << moveindex;
+            viewBoard(board);
+            whoseturn = HUMAN;
+        }
+        else
+        {
+            humanagain:
+            cout<<"Enter the cell no."<<endl;
+            cin>>moveindex;
+            x = ret_cord(moveindex).x;
+            y = ret_cord(moveindex).y;
+            while(isFilled(filled,x,y))
+            {
+                cout<<"Cell already filled, try another another empty cell.\n";
+                goto humanagain;
+            }
+            filled[i].x = x;
+            filled[i].y = y;
+            board[x][y] = HUMANMOVE;
+            cout << "You have put a " << HUMANMOVE << " in cell " << moveindex;
+            viewBoard(board);
+            whoseturn = COMPUTER;
+        }
+    }
+    if (!gameover(board) && moveindex == SIDE * SIDE)
+        cout<<"Its a draw"<<endl;
+    else
+    {
+        if(whoseturn==COMPUTER)
+            whoseturn=HUMAN;
+        else if(whoseturn==HUMAN)
+            whoseturn=COMPUTER;
+        declare(whoseturn);
+    }
+    i++;
+}
+int main()
+{
+    play(HUMAN);
+    return 0;
+}
